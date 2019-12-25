@@ -1,0 +1,246 @@
+swagger: '2.0'
+info:
+  title: Todo List
+  description: Microservice demo solution
+  version: "1.0"
+consumes:
+  - application/json
+produces:
+  - application/json
+
+basePath: /api/v1
+
+paths:
+  /todo_lists:
+    get:
+      tags: [Todo List]
+      summary: Get list of all existing Todo lists
+      operationId: api.todo_list.class_instance.get_todo_lists
+      parameters:
+        - name: limit
+          in: query
+          type: integer
+          minimum: 0
+          default: 100
+
+      responses:
+        200:
+          description: Return list of all existing Todo list
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TodoList'
+
+    post:
+      tags: [Todo List]
+      summary: Create a new Todo List
+      operationId: api.todo_list.class_instance.create_todo_list
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: todo_list
+          description: Todo list body
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                description: Todo list name
+                example: "Type new name"
+                minLength: 1
+                maxLength: 100
+
+      responses:
+        201:
+          description: A new Todo List was created
+          schema:
+            $ref: '#/definitions/TodoList'
+        400:
+          description: Bed request value
+
+  /todo_lists/{todo_list_id}:
+    get:
+      tags: [Todo List]
+      operationId: api.todo_list.class_instance.get_todo_list
+      summary: Get one existing Todo list
+      parameters:
+        - $ref: '#/parameters/todo_list_id'
+      responses:
+        200:
+          description: Return todo list
+          schema:
+            $ref: '#/definitions/TodoList'
+        404:
+          description: TodoList does not exist
+
+    put:
+      tags: [Todo List]
+      operationId: api.todo_list.class_instance.put_todo_list
+      summary: Create or update a todo list
+      parameters:
+        - $ref: '#/parameters/todo_list_id'
+        - name: todo_list
+          description: Todo list body
+          in: body
+          schema:
+            $ref: '#/definitions/TodoList'
+      responses:
+        200:
+          description: Todo List updated
+        201:
+          description: New todo list created
+        400:
+          description: Bed request value
+
+    delete:
+      tags: [Todo List]
+      operationId: api.todo_list.class_instance.delete_todo_list
+      summary: Delete todo list
+      parameters:
+        - $ref: '#/parameters/todo_list_id'
+      responses:
+        200:
+          description: Todo List was deleted
+        404:
+          description: Todo List does not exist
+
+  /todo_lists/{todo_list_id}/items:
+    post:
+      tags: [Todo List Item]
+      summary: Create a new Item into Todo List
+      operationId: api.todo_list.class_instance.create_todo_list_item
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/todo_list_id'
+        - in: body
+          name: todo_list_item
+          description: Todo list Item body
+          schema:
+            type: object
+            required:
+              - text
+            properties:
+              text:
+                type: string
+                description: Todo list Item text
+                example: "Type new item text"
+                minLength: 1
+                maxLength: 100
+              due_date:
+                type: string
+                format: date-time
+                description: Due date
+                example: "2019-12-29T05:11:22"
+              finished:
+                type: boolean
+                description: finished status
+
+      responses:
+        201:
+          description: A new Todo List Item was created
+          schema:
+            $ref: '#/definitions/TodoListItem'
+        400:
+          description: Bed request value
+
+
+  /todo_lists/{todo_list_id}/items/{todo_list_item_id}:
+
+    put:
+      tags: [Todo List Item]
+      operationId: api.todo_list.class_instance.put_todo_list_item
+      summary: Create or update todo list item
+      parameters:
+        - $ref: '#/parameters/todo_list_id'
+        - $ref: '#/parameters/todo_list_item_id'
+        - name: todo_list_item
+          description: Todo list item body
+          in: body
+          schema:
+            $ref: '#/definitions/TodoListItem'
+      responses:
+        200:
+          description: Todo Lest item updated
+        201:
+          description: New todo list item created
+        400:
+          description: Bed request value
+
+    delete:
+      tags: [Todo List Item]
+      operationId: api.todo_list.class_instance.delete_todo_list_item
+      summary: Delete todo list item
+      parameters:
+        - $ref: '#/parameters/todo_list_id'
+        - $ref: '#/parameters/todo_list_item_id'
+      responses:
+        200:
+          description: Todo List Item was deleted
+        404:
+          description: Todo List Item does not exist
+
+
+parameters:
+
+  todo_list_id:
+    name: todo_list_id
+    description: Todo List Unique identifier
+    in: path
+    type: string
+    required: true
+
+  todo_list_item_id:
+    name: todo_list_item_id
+    description: Todo List Item Unique identifier
+    in: path
+    type: string
+    required: true
+
+definitions:
+
+  TodoListItem:
+    type: object
+    required:
+      - text
+      - due_date
+      - finished
+    properties:
+      text:
+        type: string
+        description: Todo List Item text
+        example: "You have to describe it"
+        minLength: 1
+        maxLength: 1000
+      due_date:
+        type: string
+        format: date-time
+        description: Due date
+        example: "2019-12-29T05:11:22"
+      finished:
+        type: boolean
+        description: finished status
+
+  TodoList:
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Todo's title
+        example: "New name"
+        minLength: 1
+        maxLength: 100
+      items:
+        type: array
+        description: Todo List Items
+        items:
+          $ref: "#/definitions/TodoListItem"
