@@ -1,0 +1,250 @@
+swagger: '2.0'
+info:
+  title: todo microservice
+  description: todo microservice
+  version: "1.0"
+consumes:
+  - application/json
+produces:
+  - application/json
+
+
+basePath: /api/v1
+tags:
+  - name: "todos"
+    description: "A TODO task"
+schemes:
+  - "http"
+paths:
+  /todos:
+    get:
+      tags: [Todo]
+      operationId: api.todo.class_instance.get_todos
+      summary: Get all todos
+      parameters:
+        - name: status
+          in: query
+          type: string
+          pattern: "^[a-zA-Z0-9]*$"
+        - name: limit
+          in: query
+          type: integer
+          minimum: 0
+          default: 100
+        - name: sort
+          in: query
+          description: Sort order
+          type: string
+          enum: [asc, desc]
+      responses:
+        200:
+          description: Return all todos
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Todo'
+    post:
+      tags: [Todo]
+      summary: Create a new Todo
+      operationId: api.todo.class_instance.create_todo
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: new_todo
+          description: The todo to create
+          schema:
+            type: object
+            required:
+              - title
+              - description
+              - created
+            properties:
+              title:
+                type: string
+                description: Todo's title
+                example: "Do this"
+                minLength: 1
+                maxLength: 100
+              description:
+                type: string
+                description: Todo description
+                example: "You have to do it2222"
+                minLength: 1
+                maxLength: 1000
+              tags:
+                type: array
+                description: Custom tags
+                items:
+                  $ref: "#/definitions/Tag"
+              created:
+                type: string
+                format: date-time
+                description: Creation time
+                example: "2015-07-07T15:49:51.230+02:00"
+                readOnly: true
+      responses:
+        201:
+          description: A new todo was created
+          schema:
+            $ref: '#/definitions/Todo'
+  /todos/{todo_id}:
+    get:
+      tags: [Todo]
+      operationId: api.todo.class_instance.get_todo
+      summary: Get a single todo
+      parameters:
+        - $ref: '#/parameters/todo_id'
+      responses:
+        200:
+          description: Return todo
+          schema:
+            $ref: '#/definitions/Todo'
+        404:
+          description: Todo does not exist
+    put:
+      tags: [Todo]
+      operationId: api.todo.class_instance.put_todo
+      summary: Create or update a todo
+      parameters:
+        - $ref: '#/parameters/todo_id'
+        - name: todo
+          in: body
+          schema:
+            $ref: '#/definitions/Todo'
+      responses:
+        200:
+          description: Todo updated
+        201:
+          description: New todo created
+    delete:
+      tags: [Todo]
+      operationId: api.todo.class_instance.delete_todo
+      summary: Remove a todo
+      parameters:
+        - $ref: '#/parameters/todo_id'
+      responses:
+        204:
+          description: Todo was deleted
+        404:
+          description: Todo does not exist
+  /todos/findByStatus:
+    get:
+      tags: [Todo]
+      summary: "Finds TODOs by status"
+      description: "Multiple status values can be provided with comma separated strings"
+      operationId: "api.todo.class_instance.find_by_status"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "status"
+        in: "query"
+        description: "Status values that need to be considered for filter"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+          enum:
+          - "active"
+          - "done"
+          - "cancelled"
+          default: "available"
+        collectionFormat: "multi"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Todo"
+        400:
+          description: "Invalid status value"
+  /todo/findByTags:
+    get:
+      tags: [Todo]
+      summary: "Finds TODOs by tags"
+      description: "Muliple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing."
+      operationId: "api.todo.class_instance.find_by_tags"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Tags to filter by"
+        required: true
+        type: "array"
+        items:
+          type: "string"
+        collectionFormat: "multi"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Todo"
+        400:
+          description: "Invalid tag value"
+
+parameters:
+  todo_id:
+    name: todo_id
+    description: Todo's Unique identifier
+    in: path
+    type: integer
+    required: true
+
+definitions:
+  Todo:
+    type: object
+    required:
+      - title
+      - description
+      - status
+    properties:
+      id:
+        type: integer
+        description: Unique identifier
+        example: 123
+        readOnly: true
+      title:
+        type: string
+        description: Todo's title
+        example: "Do this"
+        minLength: 1
+        maxLength: 100
+      status:
+        type: string
+        description: Status of the todo
+        example: "active"
+        minLength: 1
+        enum: [active, done, cancelled]
+      description:
+        type: string
+        description: Todo description
+        example: "You have to do it"
+        minLength: 1
+        maxLength: 1000
+      tags:
+        type: array
+        description: Custom tags
+        items:
+          $ref: "#/definitions/Tag"
+      created:
+        type: string
+        format: date-time
+        description: Creation time
+        example: "2015-07-07T15:49:51.230+02:00"
+        readOnly: true
+
+  Tag:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+
