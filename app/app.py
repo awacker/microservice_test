@@ -49,7 +49,7 @@ def api_schema():
 
 @app.route('/')
 def home():
-    return "TODO service is worked", 200
+    return "TODO service is working", 200
 
 
 if __name__ == '__main__':
